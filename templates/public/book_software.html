@@ -1,0 +1,124 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block start %}
+
+<style>
+    .domain-div {
+        position: relative;
+    }
+    .domain-div::after {
+        content: '.';
+        position: absolute;
+        bottom: 0;
+        right: 0px;
+        font-size: 30px;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 0.9rem;
+        margin-top: 5px;
+        display: none; /* Initially hidden */
+    }
+</style>
+
+<div class="container my-5 mx-auto">
+    <div class="row">
+        <div class="col-7 mx-auto p-3 rounded bg-light shadow border">
+            <form action="" class="row" method="post">
+                {% csrf_token %}
+                <div class="col-md-12 mb-2">
+                    <label for="institute">College/Institute Name</label>
+                    <input type="text" name="institute" id="institute" class="form-control" value="{{institute}}" required>
+                </div>
+                <div class="col-md-4 mb-2 domain-div">
+                    <label for="fix_domain">Fix Domain</label>
+                    <input type="text" name="fix_domain" class="form-control" value="attendance" readonly>
+                </div>
+                <div class="col-md-4 mb-2 domain-div">
+                    <label for="sub_domain">Sub-Domain</label>
+                    <input 
+                        type="text" 
+                        id="sub_domain" 
+                        name="sub_domain" 
+                        class="form-control" 
+                        placeholder="Enter a subdomain" 
+                        required 
+                        data-domains='{{domains}}'>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label for="main_domain">Domain</label>
+                    <input type="text" name="main_domain" class="form-control" value="localhost" readonly>
+                </div>
+                <small id="error-message" class="d-none text-danger"><i class="fa-regular fa-circle-xmark me-2"></i>This subdomain is already taken.</small>
+
+                <small id="success-message" class="d-none text-success"><i class="fa-regular fa-circle-check me-2"></i>This subdomain is valid.</small>
+
+                <div class="col-md-6 mb-2">
+                    <label for="password">Set DB Password</label>
+                    <input type="password" name="password" id="password" class="form-control">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label for="con_pass">Confirm DB Password</label>
+                    <input type="password" name="con_pass" id="con_pass" class="form-control">
+
+                </div>
+
+
+                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                    <a href="{% url 'public_home' %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-ban me-2"></i>Cancel</a>
+                    <button id="submitBtn" disabled type="submit" class="btn btn-warning btn-sm"><i class="fa-solid fa-plus me-2"></i>Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- {{domains}} -->
+
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+    const subdomainInput = document.getElementById('sub_domain');
+    
+    subdomainInput.addEventListener('input', () => {
+        const errMsg = document.getElementById('error-message');
+        const scsMsg = document.getElementById('success-message');
+        const subdomainInputField = document.getElementById('sub_domain');
+        const domains = subdomainInputField.getAttribute('data-domains').split("'"); 
+        const fieldInputValue = subdomainInputField.value;  
+        const submitBtn = document.getElementById('submitBtn');
+        let sanitizedValue = fieldInputValue;
+
+        if (fieldInputValue === '') {
+            errMsg.classList.add('d-none'); 
+            scsMsg.classList.add('d-none');  
+            subdomainInputField.classList.remove('text-danger', 'border-danger'); 
+            submitBtn.disabled=true;
+            return;  
+        }
+
+        if (fieldInputValue.includes(' ')) {
+            sanitizedValue = fieldInputValue.replace(/\s+/g, ''); 
+            subdomainInputField.value = sanitizedValue;
+        } 
+
+        if (domains.indexOf(sanitizedValue) !== -1) {
+            errMsg.classList.remove('d-none');
+            subdomainInputField.classList.add('text-danger', 'border-danger');
+            scsMsg.classList.add('d-none');
+            submitBtn.disabled=true;
+        } else {
+            scsMsg.classList.remove('d-none');
+            errMsg.classList.add('d-none');   
+            subdomainInputField.classList.remove('text-danger', 'border-danger'); 
+            submitBtn.disabled=false;
+        }
+
+        console.log('Domains:', domains);
+    });
+});
+
+</script>
+
+
+{% endblock %}
